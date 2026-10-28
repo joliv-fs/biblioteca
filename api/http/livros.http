@@ -1,0 +1,114 @@
+# =====================================================================
+# Testes da API de Livro
+#
+# PRÉ-REQUISITO: ter um autor cadastrado (pelo autores.http).
+# Os testes usam o autor de id 1. Se o seu for outro, troque o "autorId".
+# =====================================================================
+
+@baseUrl = http://localhost:8080
+
+
+# ---------------------------------------------------------------------
+# CAMINHO FELIZ
+# ---------------------------------------------------------------------
+
+### Listar livros (no começo, [])
+GET {{baseUrl}}/livros
+
+### Criar livro → 201 Created, com o autor completo na resposta
+# Do autor, manda SÓ o id.
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro",
+  "anoPublicacao": 1899,
+  "autorId": 1
+}
+
+### Criar outro livro do mesmo autor → 201 Created
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Memórias Póstumas de Brás Cubas",
+  "anoPublicacao": 1881,
+  "autorId": 1
+}
+
+### Criar livro sem ano (é opcional) → 201 Created
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro Temporário",
+  "autorId": 1
+}
+
+### Listar de novo → 200 OK, cada livro com o autor dentro
+GET {{baseUrl}}/livros
+
+### Buscar por id → 200 OK
+GET {{baseUrl}}/livros/1
+
+### Atualizar (corrige o ano) → 200 OK
+PUT {{baseUrl}}/livros/2
+Content-Type: application/json
+
+{
+  "titulo": "Memórias Póstumas de Brás Cubas",
+  "anoPublicacao": 1880,
+  "autorId": 1
+}
+
+### Excluir → 204 No Content
+DELETE {{baseUrl}}/livros/3
+
+
+# ---------------------------------------------------------------------
+# ERROS
+# ---------------------------------------------------------------------
+
+### 404 – livro que não existe
+GET {{baseUrl}}/livros/999
+
+### 404 – autor que não existe (o livro NÃO é criado)
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro Fantasma",
+  "autorId": 999
+}
+
+### 400 – validação: título vazio e sem autor (dois erros de uma vez)
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": ""
+}
+
+### 400 – validação: ano negativo
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro do Futuro",
+  "anoPublicacao": -5,
+  "autorId": 1
+}
+
+### 400 – JSON inválido: texto no lugar de número
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro",
+  "anoPublicacao": "mil oitocentos",
+  "autorId": 1
+}
+
+### 409 – excluir um AUTOR que tem livros
+# O banco não deixa: os livros dele ficariam sem autor.
+DELETE {{baseUrl}}/autores/1
