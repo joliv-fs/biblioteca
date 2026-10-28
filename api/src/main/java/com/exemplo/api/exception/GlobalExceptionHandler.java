@@ -3,6 +3,7 @@ package com.exemplo.api.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -80,4 +81,23 @@ public class GlobalExceptionHandler {
     // Repare que NÃO existe um método para Exception (todas as exceções).
     // Ele capturaria também os erros que o Spring já trata do jeito certo,
     // como endereço inexistente (404) e método não permitido (405), e transformaria tudo em 500.
+
+/**
+     * NOVO NO M2
+     * 409 – Conflict
+     * Quando: o BANCO recusou a operação para proteger os dados. Exemplos:
+     *   - excluir um autor que tem livros (a chave estrangeira não deixa);
+     *   - no M3: cadastrar um gênero com um nome que já existe (a coluna é única).
+     *
+     * A mensagem é genérica de propósito, para servir aos dois casos.
+     * O ex.getMessage() NÃO é usado: ele traz detalhes técnicos do banco
+     * (nomes de tabelas, SQL) que não devem aparecer para o usuário.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroResponseDTO> tratarIntegridade(DataIntegrityViolationException ex) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErroResponseDTO erro = new ErroResponseDTO(status.value(),
+                "Conflito com dados existentes: registro duplicado ou em uso por outros dados", Map.of());
+        return ResponseEntity.status(status).body(erro);
+    }
 }
