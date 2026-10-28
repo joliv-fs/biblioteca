@@ -1,0 +1,111 @@
+# =====================================================================
+# Testes da API de Autor
+#
+# Como usar:
+#   - Clique em "Send Request" em cima de cada requisição.
+#   - A resposta abre numa aba ao lado: status, cabeçalhos e corpo.
+#   - "###" separa uma requisição da outra.
+#   - Linhas começando com # são comentários.
+# =====================================================================
+
+# Variável com o endereço da API. Usada abaixo como {{baseUrl}}.
+@baseUrl = http://localhost:8080
+
+
+# ---------------------------------------------------------------------
+# CAMINHO FELIZ
+# ---------------------------------------------------------------------
+
+### Listar autores (no começo, vem uma lista vazia: [])
+GET {{baseUrl}}/autores
+
+### Criar autor → 201 Created
+# A LINHA EM BRANCO entre o cabeçalho (Content-Type) e o JSON é OBRIGATÓRIA.
+# Content-Type: application/json avisa a API que o corpo é um JSON.
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nome": "Machado de Assis",
+  "nacionalidade": "Brasileira"
+}
+
+### Criar outro autor → 201 Created
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nome": "Clarice Lispector",
+  "nacionalidade": "Brasileira"
+}
+
+### Criar autor sem nacionalidade (é opcional) → 201 Created
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nome": "Autor Temporário"
+}
+
+### Listar de novo → 200 OK com os 3 autores
+GET {{baseUrl}}/autores
+
+### Buscar por id → 200 OK
+GET {{baseUrl}}/autores/1
+
+### Atualizar → 200 OK com os dados novos
+PUT {{baseUrl}}/autores/2
+Content-Type: application/json
+
+{
+  "nome": "Clarice Lispector",
+  "nacionalidade": "Ucraniana-brasileira"
+}
+
+### Excluir → 204 No Content (sem corpo)
+DELETE {{baseUrl}}/autores/3
+
+
+# ---------------------------------------------------------------------
+# ERROS
+# ---------------------------------------------------------------------
+
+### 404 – buscar autor que não existe
+GET {{baseUrl}}/autores/999
+
+### 404 – atualizar autor que não existe
+PUT {{baseUrl}}/autores/999
+Content-Type: application/json
+
+{
+  "nome": "Ninguém"
+}
+
+### 404 – excluir autor que não existe
+DELETE {{baseUrl}}/autores/999
+
+### 400 – validação: nome vazio
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nome": "",
+  "nacionalidade": "Brasileira"
+}
+
+### 400 – validação: sem o campo nome
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nacionalidade": "Brasileira"
+}
+
+### 400 – JSON quebrado (falta a vírgula depois de "Teste")
+POST {{baseUrl}}/autores
+Content-Type: application/json
+
+{
+  "nome": "Teste"
+  "nacionalidade": "Brasileira"
+}

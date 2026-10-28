@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivo do banco H2: cada pessoa tem o seu, ele não vai para o GitHub
+data/
