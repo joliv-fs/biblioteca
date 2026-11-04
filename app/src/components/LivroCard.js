@@ -43,8 +43,7 @@ export default function LivroCard({ livro, onExcluir }) {
   // Se o livro não tiver gêneros (array vazio), devolva '' (texto vazio).
   // Dica: map para pegar só os nomes; depois .join(', ') junta um array de textos com ", ".
   function textoDosGeneros() {
-    const textoDosGeneros = () =>
-      livro.generos?.map((g) => g.nome).join(", ") || "";
+    return livro.generos?.map((g) => g.nome).join(", ") || "";
   }
 
   // ✏️ TODO 3 – Texto do autor e do ano
@@ -52,8 +51,7 @@ export default function LivroCard({ livro, onExcluir }) {
   // Sem ano (anoPublicacao é null): 'Machado de Assis'
   // Dica: o nome do autor está em livro.autor.nome; use template string.
   function textoDoAutor() {
-    const textoDoAutor = () =>
-      `${livro.autor?.nome || "Autor desconhecido"}${livro.anoPublicacao ? ` · ${livro.anoPublicacao}` : ""}`;
+    return `${livro.autor?.nome || "Autor desconhecido"}${livro.anoPublicacao ? ` · ${livro.anoPublicacao}` : ""}`;
   }
 
   // ✏️ TODO 4 – JSX
