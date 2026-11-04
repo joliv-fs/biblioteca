@@ -91,3 +91,32 @@ export function listarLivros() {
 export function excluirLivro(id) {
   return requisitar(`/livros/${id}`, { method: "DELETE" });
 }
+
+// ---------- Livros (cadastro) ----------
+
+// Cadastra um livro. Faz um POST /livros.
+//
+// "dados" é um objeto no formato do LivroRequestDTO da API:
+//   { titulo: 'Dom Casmurro', anoPublicacao: 1899, autorId: 1 }
+//   (anoPublicacao pode ser null)
+//
+// Se der certo: devolve o livro criado (com id, autor e gêneros).
+// Se os dados estiverem errados: lança um ErroApi com status 400 e,
+// em erro.campos, a mensagem de cada campo, ex.: { titulo: 'O título é obrigatório' }
+export function criarLivro(dados) {
+  return requisitar("/livros", {
+    method: "POST", // POST = criar
+    headers: { "Content-Type": "application/json" }, // avisa a API que o corpo é JSON (sem isso: erro 415)
+    body: JSON.stringify(dados), // transforma o objeto JS em texto JSON
+  });
+}
+
+// ---------- Autores ----------
+// Um autor chega assim (AutorResponseDTO):
+//   { id: 1, nome: 'Machado de Assis', nacionalidade: 'Brasileira' }
+
+// Busca todos os autores. Devolve um ARRAY de autores.
+// Usado na tela de cadastro, para o usuário escolher o autor do livro.
+export function listarAutores() {
+  return requisitar("/autores");
+}
