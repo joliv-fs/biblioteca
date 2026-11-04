@@ -7,26 +7,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.exemplo.api.model.Livro;
 
-/**
- * Acesso ao banco para a entidade Livro.
- * JpaRepository<Livro, Long> → cuida de Livro, cujo id é Long.
- * Traz os mesmos métodos prontos do AutorRepository (findAll, findById, save, delete...).
- */
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
     /**
-     * Sobrescreve o findAll() padrão para trazer cada livro JÁ COM o autor.
+     * Lista os livros JÁ COM o autor e os gêneros, numa consulta só (evita o
+     * problema N+1).
      *
-     * O problema que isso resolve (chamado de "N+1"):
-     * como o autor é LAZY, listar 10 livros e depois pedir o autor de cada um faria
-     * 1 consulta para os livros + 10 consultas, uma para cada autor = 11 consultas.
-     *
-     * @EntityGraph(attributePaths = {"autor"}) → "quando buscar os livros, traga o autor junto".
-     * Resultado: UMA consulta só, com JOIN entre LIVRO e AUTOR.
-     *
-     * @Override → avisa que este método substitui o findAll() que veio do JpaRepository.
+     * NOVO NO M3: "generos" entrou na lista do attributePaths.
+     * Sem isso, listar 10 livros faria mais 10 consultas, uma para os gêneros de
+     * cada livro.
      */
     @Override
-    @EntityGraph(attributePaths = {"autor"})
+    @EntityGraph(attributePaths = { "autor", "generos" })
     List<Livro> findAll();
 }
