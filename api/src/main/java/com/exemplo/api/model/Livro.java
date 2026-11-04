@@ -1,5 +1,8 @@
 package com.exemplo.api.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -7,56 +10,63 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 /**
  * Entidade Livro → tabela LIVRO.
- *
- * Mesmo molde do Autor (id, colunas, construtor vazio, getters e setters),
- * mais o relacionamento com Autor.
+ * Relacionamentos (os dois ficam só aqui, no Livro):
+ * - N:1 com Autor (cada livro tem um autor)
+ * - N:N com Genero (cada livro tem vários gêneros)
  */
 @Entity
 public class Livro {
 
-    // Chave primária gerada pelo banco (1, 2, 3...), igual ao Autor.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Coluna TITULO: obrigatória, no máximo 150 caracteres.
     @Column(nullable = false, length = 150)
     private String titulo;
 
-    /**
-     * Coluna ANO_PUBLICACAO.
-     * O Hibernate transforma o nome em camelCase (anoPublicacao) em ANO_PUBLICACAO no banco.
-     *
-     * É Integer (objeto), e não int (primitivo), porque o ano é OPCIONAL:
-     * Integer aceita null ("sem ano"); int não aceita, ele viraria 0.
-     */
+    // Opcional: Integer aceita null ("sem ano").
     private Integer anoPublicacao;
 
-    /**
-     * O RELACIONAMENTO: cada livro tem UM autor.
-     *
-     * @ManyToOne → "muitos livros para um autor". Fica no lado N (o Livro),
-     *              porque é a tabela LIVRO que guarda a ligação.
-     *
-     *   fetch = FetchType.LAZY → o autor só é buscado no banco quando alguém
-     *              chamar livro.getAutor(). Isso evita consultas desnecessárias.
-     *   optional = false       → todo livro TEM que ter um autor.
-     *
-     * @JoinColumn(name = "autor_id") → nome da coluna da chave estrangeira na tabela LIVRO.
-     *   nullable = false → o banco também não aceita livro sem autor.
-     *
-     * Repare: o atributo é do tipo Autor (o objeto inteiro), e não Long.
-     * No Java a gente trabalha com objetos; quem transforma isso em autor_id é o Hibernate.
-     */
+    // N:1 → muitos livros para um autor (coluna autor_id na tabela LIVRO). Criado
+    // no M2.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "autor_id", nullable = false)
     private Autor autor;
 
-    // Construtor vazio: o JPA exige.
+    /**
+     * NOVO NO M3: N:N → muitos livros para muitos gêneros.
+     *
+     * @ManyToMany → um livro tem vários gêneros e um gênero está em vários livros.
+     *             (É LAZY por padrão: os gêneros só são buscados quando alguém
+     *             pedir.)
+     *
+     * @JoinTable → descreve a TABELA DE LIGAÇÃO, que o Hibernate cria sozinho:
+     *            name = "livro_genero" → nome da tabela
+     *            joinColumns = @JoinColumn(name = "livro_id") → coluna que aponta
+     *            para ESTA entidade (Livro)
+     *            inverseJoinColumns = @JoinColumn(name = "genero_id") → coluna que
+     *            aponta para a OUTRA (Genero)
+     *
+     *            Set (e não List):
+     *            - um livro não pode ter o mesmo gênero duas vezes, e o Set não
+     *            aceita repetidos;
+     *            - o Hibernate trabalha melhor com Set quando busca várias coleções
+     *            ao mesmo tempo.
+     *
+     *            = new HashSet<>() → começa com um conjunto VAZIO (e não null).
+     *            Assim, um livro sem gêneros tem uma lista vazia, e o código nunca
+     *            tropeça num null.
+     */
+    @ManyToMany
+    @JoinTable(name = "livro_genero", joinColumns = @JoinColumn(name = "livro_id"), inverseJoinColumns = @JoinColumn(name = "genero_id"))
+    private Set<Genero> generos = new HashSet<>();
+
     public Livro() {
     }
 
@@ -94,5 +104,15 @@ public class Livro {
 
     public void setAutor(Autor autor) {
         this.autor = autor;
+    }
+
+    // NOVO NO M3
+    public Set<Genero> getGeneros() {
+        return generos;
+    }
+
+    // NOVO NO M3
+    public void setGeneros(Set<Genero> generos) {
+        this.generos = generos;
     }
 }
