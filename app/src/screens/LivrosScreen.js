@@ -36,7 +36,7 @@ import { excluirLivro, listarLivros } from "../services/api";
 //         └── ListEmptyComponent → Text styles.vazio "Nenhum livro cadastrado."
 // =====================================================================
 
-export default function LivrosScreen() {
+export default function LivrosScreen({ onNovo }) {
   // ✏️ TODO 1 – Estados
   // Crie os três estados da tela, com ESTES nomes (o código pronto abaixo usa eles):
   //   livros     → começa com []
@@ -130,7 +130,12 @@ export default function LivrosScreen() {
   //   onExcluir={excluir}   ← a função PRONTA lá de cima (e não removerDaLista)
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Livros</Text>
+      <View style={styles.cabecalho}>
+        <Text style={styles.titulo}>Livros</Text>
+        <Pressable style={styles.botao} onPress={onNovo}>
+          <Text style={styles.botaoTexto}>Novo livro</Text>
+        </Pressable>
+      </View>
 
       <FlatList
         data={livros}
@@ -163,11 +168,18 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 16,
   },
+  // NOVO NO M5: linha com o título à esquerda e o botão "Novo livro" à direita.
+  cabecalho: {
+    flexDirection: "row",
+    justifyContent: "space-between", // um em cada ponta
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  // O marginBottom saiu daqui e foi para o cabecalho.
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 16,
   },
   // Botão laranja (Tentar de novo).
   botao: {
