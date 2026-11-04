@@ -27,7 +27,12 @@ A API fica em http://localhost:8080
 
 ### App
 
-(será preenchido no M4)
+```bash
+cd app
+npm run web
+```
+
+O app abre em http://localhost:8081 (a API precisa estar rodando)
 
 ## Fluxo de trabalho de cada milestone
 
