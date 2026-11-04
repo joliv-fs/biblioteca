@@ -1,0 +1,131 @@
+# =====================================================================
+# Testes da API de Gênero
+# =====================================================================
+
+@baseUrl = http://localhost:8080
+
+
+# ---------------------------------------------------------------------
+# CAMINHO FELIZ
+# ---------------------------------------------------------------------
+
+### Listar gêneros (no começo, [])
+GET {{baseUrl}}/generos
+
+### Criar gêneros → 201 Created (rode os três)
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nome": "Romance"
+}
+
+###
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nome": "Realismo"
+}
+
+###
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nome": "Ficção"
+}
+
+### Listar de novo → 200 OK com os 3 gêneros
+GET {{baseUrl}}/generos
+
+### Buscar por id → 200 OK
+GET {{baseUrl}}/generos/1
+
+### Atualizar → 200 OK
+PUT {{baseUrl}}/generos/3
+Content-Type: application/json
+
+{
+  "nome": "Ficção Científica"
+}
+
+
+# ---------------------------------------------------------------------
+# ERROS
+# ---------------------------------------------------------------------
+
+### 409 – nome repetido (o "Romance" já existe)
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nome": "Romance"
+}
+
+### 400 – validação: nome vazio
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nome": ""
+}
+
+### 404 – gênero que não existe
+GET {{baseUrl}}/generos/999
+
+# =====================================================================
+# M3 – LIVROS COM GÊNEROS
+# PRÉ-REQUISITO: autor de id 1 e gêneros 1 e 2 cadastrados.
+# Se os seus ids forem outros, ajuste o "autorId" e o "generoIds".
+# =====================================================================
+
+### Criar livro com gêneros → 201 Created, com a lista de gêneros na resposta
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Quincas Borba",
+  "anoPublicacao": 1891,
+  "autorId": 1,
+  "generoIds": [1, 2]
+}
+
+### Atualizar o livro 1 colocando gêneros → 200 OK
+# No PUT, a lista enviada SUBSTITUI a anterior: o livro fica exatamente com estes gêneros.
+PUT {{baseUrl}}/livros/1
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro",
+  "anoPublicacao": 1899,
+  "autorId": 1,
+  "generoIds": [1, 2]
+}
+
+### Ids repetidos na lista → o Set descarta o repetido (o livro fica com 1 e 2)
+PUT {{baseUrl}}/livros/1
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro",
+  "anoPublicacao": 1899,
+  "autorId": 1,
+  "generoIds": [1, 1, 2]
+}
+
+### Listar → cada livro com autor e gêneros
+GET {{baseUrl}}/livros
+
+### 404 – um dos gêneros não existe (o livro NÃO é criado)
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro Fantasma",
+  "autorId": 1,
+  "generoIds": [1, 999]
+}
+
+### 409 – excluir um GÊNERO que está em algum livro
+DELETE {{baseUrl}}/generos/1
